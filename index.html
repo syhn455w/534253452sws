@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>皮克敏蘑菇 PWA Pro</title>
+    <title>蘑菇大師 Master Pro</title>
     
     <!-- PWA Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#16a34a" id="theme-color-meta">
+    <meta name="theme-color" content="#10b981" id="theme-color-meta">
     <link rel="apple-touch-icon" href="https://www.pikminbloom.com/favicon.ico">
     <link rel="manifest" id="pwa-manifest">
 
@@ -18,194 +18,219 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#10b981', 600: '#059669', 900: '#064e3b' }
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' },
                     animation: {
-                        'bounce-subtle': 'bounce-subtle 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-up': 'slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'shimmer': 'shimmer 2s linear infinite',
                     },
                     keyframes: {
-                        'bounce-subtle': {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-5px)' },
-                        }
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        'slide-up': { 'from': { transform: 'translateY(100%)', opacity: '0' }, 'to': { transform: 'translateY(0)', opacity: '1' } },
+                        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } }
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
         :root { --safe-area-inset-top: env(safe-area-inset-top); }
         
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.3s;
-            /* 防止整體頁面過度拉伸 */
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #f8fafc; 
             overscroll-behavior-y: none;
+            transition: background-color 0.3s ease;
         }
 
-        /* 鎖定背景捲動的樣式 */
-        body.modal-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-        }
-        
-        .app-gradient { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
-        .dark .app-gradient { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .dark .glass-card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* 修正 iOS 背景鎖定偏移的關鍵 CSS */
+        body.modal-open { 
+            overflow: hidden; 
+            position: fixed; 
+            width: 100%; 
+            height: 100%;
         }
 
-        /* 滾輪選擇器優化：防止抖動與隔離捲動 */
+        .premium-bg { background: linear-gradient(165deg, #10b981 0%, #059669 100%); }
+        .dark .premium-bg { background: linear-gradient(165deg, #064e3b 0%, #022c22 100%); }
+        .premium-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+
+        /* 滾輪選擇器組件 */
         .picker-container {
             position: relative;
-            height: 160px;
+            height: 180px;
             overflow: hidden;
             display: flex;
-            background: rgba(0,0,0,0.03);
-            border-radius: 1.5rem;
-            mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
+            background: rgba(241, 245, 249, 0.8);
+            border-radius: 2rem;
+            mask-image: linear-gradient(to bottom, transparent, black 45%, black 55%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 45%, black 55%, transparent);
             overscroll-behavior: contain;
         }
-        .dark .picker-container { background: rgba(255,255,255,0.05); }
+        .dark .picker-container { background: rgba(30, 41, 59, 0.5); }
 
-        .picker-column {
-            flex: 1 0 33.33%; /* 強制固定寬度，防止左右位移 */
-            overflow-y: scroll;
-            overflow-x: hidden; /* 徹底禁止水平滾動，解決 iPhone 左右飄的問題 */
-            scroll-snap-type: y mandatory;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            touch-action: pan-y; /* 鎖定只許垂直滑動 */
-            padding: 55px 0;
-            position: relative;
+        .picker-column { 
+            flex: 1 0 33.33%; 
+            overflow-y: scroll; 
+            overflow-x: hidden; 
+            scroll-snap-type: y mandatory; 
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch; 
+            overscroll-behavior: contain; 
+            touch-action: pan-y; 
+            padding: 65px 0; 
         }
         .picker-column::-webkit-scrollbar { display: none; }
 
-        .picker-item {
-            height: 50px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            scroll-snap-align: center;
-            font-size: 1.25rem;
-            font-weight: 900;
-            color: #94a3b8;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        .picker-item { 
+            height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            scroll-snap-align: center; 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: #94a3b8; 
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             white-space: nowrap;
         }
-        .picker-item.active { color: #16a34a; transform: scale(1.15); }
-        .dark .picker-item.active { color: #4ade80; }
+        .picker-item.active { color: #10b981; transform: scale(1.2); font-weight: 900; }
+        .dark .picker-item.active { color: #34d399; }
 
-        .picker-center-bar {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%; height: 50px;
-            border-top: 1px solid rgba(22, 163, 74, 0.2);
-            border-bottom: 1px solid rgba(22, 163, 74, 0.2);
-            pointer-events: none;
+        .picker-center-indicator { 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 85%; height: 50px; 
+            background: rgba(16, 185, 129, 0.08); 
+            border-radius: 12px; 
+            pointer-events: none; 
         }
 
+        /* 底部抽屜動畫邏輯 */
+        .drawer-content { 
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); 
+            transform: translateY(100%); 
+        }
+        .modal-active .drawer-content { transform: translateY(0); }
+        
+        .progress-shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* 蘑菇圖示選擇按鈕 */
         .mush-icon-btn {
-            width: 44px; height: 44px;
-            border-radius: 12px;
+            width: 46px; height: 46px;
+            border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            transition: all 0.2s;
+            font-size: 22px;
+            transition: all 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
             border: 2px solid transparent;
         }
         .mush-icon-btn.selected {
-            border-color: #16a34a;
-            transform: scale(1.1);
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #10b981;
+            transform: scale(1.15);
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
         }
-        .dark .mush-icon-btn.selected { background: #1e293b; border-color: #4ade80; }
+        .dark .mush-icon-btn.selected { background: #1e293b; border-color: #34d399; }
     </style>
 </head>
-<body class="min-h-screen pb-20 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+<body class="dark:bg-slate-950 text-slate-900 dark:text-slate-100">
 
-    <!-- Header -->
-    <header class="app-gradient text-white px-6 pb-12 rounded-b-[3.5rem] shadow-2xl sticky top-0 z-40 transition-all">
-        <div class="max-w-md mx-auto flex justify-between items-center" style="padding-top: calc(var(--safe-area-inset-top) + 1.5rem);">
-            <div>
-                <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
-                    <span class="text-3xl animate-bounce-subtle">🍄</span> 皮克敏計時 Pro
-                </h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <span id="pwa-status" class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                    <p id="status-text" class="text-green-100 text-xs font-medium opacity-80">通知檢查中...</p>
+    <div class="app-shell flex flex-col min-h-screen">
+        <!-- 頂部 Header：支援動態島 -->
+        <header class="premium-bg text-white px-6 pb-14 rounded-b-[4rem] shadow-2xl sticky top-0 z-30 transition-all overflow-hidden">
+            <div class="max-w-md mx-auto" style="padding-top: calc(var(--safe-area-inset-top) + 1rem);">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-black tracking-tighter flex items-center gap-2">
+                            <span class="animate-float">🍄</span> 蘑菇大師
+                        </h1>
+                        <div id="status-badge" class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full mt-2 transition-all cursor-pointer" onclick="toggleDiag()">
+                            <span id="pwa-status-dot" class="w-2 h-2 rounded-full bg-red-400 shadow-sm"></span>
+                            <span id="status-text" class="text-[10px] font-bold uppercase tracking-widest">系統檢查中</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleDarkMode()" class="p-4 bg-white/10 hover:bg-white/20 rounded-3xl backdrop-blur-lg border border-white/10 active:scale-90 transition-all">
+                            <svg id="dark-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button onclick="toggleDarkMode()" class="bg-white/10 p-3 rounded-2xl border border-white/20 active:scale-90 transition-all">
-                    <svg id="dark-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l.707.707M6.343 6.343l.707-.707M14.5 12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                    </svg>
-                </button>
-                <button onclick="toggleAddModal()" class="bg-white text-green-600 p-3 rounded-2xl shadow-xl active:scale-90 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
-                </button>
-            </div>
-        </div>
-    </header>
+        </header>
 
-    <main class="max-w-md mx-auto px-4 -mt-8 space-y-4">
-        <!-- PWA 安裝提示 -->
-        <div id="pwa-install-banner" class="hidden bg-indigo-600 text-white p-5 rounded-[2rem] shadow-xl flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="text-3xl">📱</div>
-                <div class="text-xs font-bold leading-tight text-pretty pr-2">安裝到主畫面<br><span class="opacity-80 font-normal text-[10px]">重生前 20 秒精準提醒</span></div>
+        <!-- 主內容清單 -->
+        <main class="max-w-md mx-auto w-full px-5 -mt-8 space-y-6 z-10 flex-grow pb-32">
+            <!-- 診斷卡片 -->
+            <div id="diag-card" class="hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-6 rounded-4xl border border-slate-200/50 dark:border-slate-800/50 premium-shadow animate-slide-up">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">授權診斷中心</span>
+                    <button onclick="toggleDiag()" class="text-slate-300 font-bold p-1">✕</button>
+                </div>
+                <p id="diag-info" class="text-xs font-medium text-slate-600 dark:text-slate-400 leading-relaxed"></p>
+                <button onclick="requestNotificationPermission()" id="perm-btn" class="w-full mt-4 bg-brand-500 text-white py-4 rounded-2xl text-xs font-bold shadow-lg active:scale-95 transition-all">
+                    立即啟用完整通知權限
+                </button>
             </div>
-            <button id="install-button" class="bg-white text-indigo-600 px-5 py-2 rounded-full text-xs font-black flex-shrink-0">立即安裝</button>
-        </div>
 
-        <!-- 診斷區域 -->
-        <div id="diag-banner" class="bg-white dark:bg-slate-900 p-4 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">系統診斷</span>
-                <span id="perm-label" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">檢查中</span>
+            <!-- 動態生成的列表 -->
+            <div id="mushroom-list" class="grid gap-5"></div>
+
+            <!-- 空狀態提示 -->
+            <div id="empty-state" class="hidden py-32 text-center space-y-4">
+                <div class="relative inline-block">
+                    <div class="absolute inset-0 bg-brand-500/20 blur-3xl rounded-full"></div>
+                    <span class="relative text-7xl">🍃</span>
+                </div>
+                <p class="text-slate-400 font-bold tracking-tight">目前沒有監控中的蘑菇<br><span class="text-[10px] font-medium opacity-60 uppercase tracking-widest mt-1 inline-block">Tap + to add new tracker</span></p>
             </div>
-            <button onclick="requestNotificationPermission()" id="perm-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl text-xs font-bold shadow-md active:scale-95 transition-all hidden">
-                點此授權通知權限
+        </main>
+
+        <!-- 底部 FAB -->
+        <div class="fixed bottom-8 right-6 z-40">
+            <button onclick="toggleAddModal()" class="w-20 h-20 bg-brand-500 text-white rounded-[2.2rem] flex items-center justify-center active:scale-90 transition-all shadow-2xl border-4 border-white dark:border-slate-900">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
             </button>
         </div>
+    </div>
 
-        <!-- 計時清單 -->
-        <div id="empty-state" class="py-24 text-center space-y-4 opacity-30">
-            <div class="text-6xl">✨</div>
-            <p class="font-bold">目前沒有追蹤中的蘑菇</p>
-        </div>
-
-        <div id="mushroom-list" class="grid gap-4"></div>
-    </main>
-
-    <!-- 新增彈窗 -->
-    <div id="add-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md hidden">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-8 space-y-6 shadow-2xl transition-all mb-safe">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-black text-slate-800 dark:text-slate-100">追蹤新蘑菇</h2>
-                <button onclick="toggleAddModal()" class="text-slate-300 p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
+    <!-- 新增蘑菇抽屜 (Master Pro 精修版) -->
+    <div id="add-modal" class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 backdrop-blur-sm hidden transition-opacity">
+        <div class="drawer-content bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-[3.5rem] p-8 pb-14 shadow-2xl overflow-hidden relative">
+            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-8"></div>
             
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">新增追蹤項目</h2>
+                <button onclick="toggleAddModal()" class="w-10 h-10 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center justify-center active:scale-90 font-bold">✕</button>
+            </div>
+
             <div class="space-y-6">
-                <!-- 蘑菇顏色選擇器 -->
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">選擇蘑菇顏色</label>
-                    <div class="flex justify-between bg-slate-50 dark:bg-slate-800 p-3 rounded-3xl" id="color-picker">
+                <!-- 智慧預設 -->
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">快速預設戰鬥時間</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setPreset(3, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">3 時</button>
+                        <button onclick="setPreset(6, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">6 時</button>
+                        <button onclick="setPreset(12, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">12 時</button>
+                        <button onclick="setPreset(23, 59, 59)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">1 天</button>
+                    </div>
+                </div>
+
+                <!-- 顏色與標籤 -->
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">標籤與蘑菇類型</label>
+                    <input type="text" id="input-label" placeholder="例如：巷口紅蘑菇" class="w-full p-5 bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent rounded-4xl focus:border-brand-500 focus:bg-white dark:focus:bg-slate-800 outline-none font-bold text-lg transition-all">
+                    <div class="flex justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-4xl border border-slate-100 dark:border-slate-800" id="color-picker">
                         <button onclick="selectColor('red', '🔴')" class="mush-icon-btn selected" data-color="red">🔴</button>
                         <button onclick="selectColor('yellow', '🟡')" class="mush-icon-btn" data-color="yellow">🟡</button>
                         <button onclick="selectColor('blue', '🔵')" class="mush-icon-btn" data-color="blue">🔵</button>
@@ -215,34 +240,32 @@
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">地點名稱 (選填)</label>
-                    <input type="text" id="input-label" placeholder="例如：捷運站、公園入口" class="w-full p-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-2xl focus:border-green-500 outline-none font-bold text-sm">
-                </div>
-
-                <div class="space-y-2">
+                <!-- 滾輪微調 -->
+                <div class="space-y-3">
                     <div class="flex justify-between items-center px-1">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">剩餘戰鬥時間</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">精確微調戰鬥剩餘時間</label>
                         <div class="flex gap-2">
-                            <button onclick="adjustWheel('h', 1)" class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl font-bold active:bg-green-100 transition-colors">+1時</button>
-                            <button onclick="adjustWheel('m', 10)" class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl font-bold active:bg-green-100 transition-colors">+10分</button>
-                            <button onclick="adjustWheel('s', 10)" class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl font-bold active:bg-green-100 transition-colors">+10秒</button>
+                            <button onclick="adjustWheel('m', 10)" class="text-[10px] bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300 px-3 py-1.5 rounded-xl font-black active:scale-95">+10分</button>
+                            <button onclick="adjustWheel('s', 10)" class="text-[10px] bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300 px-3 py-1.5 rounded-xl font-black active:scale-95">+10秒</button>
                         </div>
                     </div>
                     <div class="picker-container">
-                        <div class="picker-center-bar"></div>
+                        <div class="picker-center-indicator"></div>
                         <div id="wheel-h" class="picker-column"></div>
                         <div id="wheel-m" class="picker-column"></div>
                         <div id="wheel-s" class="picker-column"></div>
                     </div>
                 </div>
 
-                <button onclick="addMushroom()" class="w-full bg-green-600 text-white font-black py-5 rounded-[2rem] shadow-xl active:scale-95 transition-all text-lg">開始追蹤 (5分重生)</button>
+                <button onclick="addMushroom()" class="w-full bg-brand-500 text-white font-black py-6 rounded-4xl shadow-xl shadow-brand-500/20 active:scale-[0.98] transition-all text-xl mt-4">
+                    確認追蹤 (5分重生)
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900/90 dark:bg-slate-100/90 text-white dark:text-slate-900 px-8 py-3 rounded-full shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-50 text-sm font-bold text-center">已更新</div>
+    <!-- 全局快訊 -->
+    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-slate-900/95 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-full shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[60] text-sm font-black border border-white/10">已完成</div>
 
     <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
@@ -252,196 +275,150 @@
         let wakeLock = null;
         let selectedTime = { h: 0, m: 0, s: 0 };
         let currentMushroomColor = { id: 'red', emoji: '🔴' };
+        let scrollYBeforeModal = 0;
 
-        // 1. 初始化
+        // 初始化
         window.onload = () => { 
-            initDarkMode();
+            initDarkMode(); 
             initSW(); 
-            initWheels();
+            initWheels(); 
             loadData(); 
             renderList(); 
             startTicker(); 
         };
 
-        // 深色模式切換
+        // 深色模式邏輯
         function initDarkMode() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
-                updateThemeIcon(true);
+                updateThemeStyles(true);
             }
         }
-
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.theme = isDark ? 'dark' : 'theme';
-            updateThemeIcon(isDark);
+            updateThemeStyles(isDark);
         }
-
-        function updateThemeIcon(isDark) {
+        function updateThemeStyles(isDark) {
             const icon = document.getElementById('dark-icon');
             const meta = document.getElementById('theme-color-meta');
             if (isDark) {
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l.707.707M6.343 6.343l.707-.707M14.5 12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />';
-                meta.setAttribute('content', '#022c22');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l.707.707M6.343 6.343l.707-.707M14.5 12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />';
+                meta.setAttribute('content', '#064e3b');
             } else {
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
-                meta.setAttribute('content', '#16a34a');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+                meta.setAttribute('content', '#10b981');
             }
         }
 
-        // PWA Manifest
-        const manifest = {
-            "name": "皮克敏蘑菇計時 Pro",
-            "short_name": "蘑菇計時",
-            "start_url": ".",
-            "display": "standalone",
-            "background_color": "#f8fafc",
-            "theme_color": "#16a34a",
-            "icons": [{ "src": "https://www.pikminbloom.com/favicon.ico", "sizes": "192x192", "type": "image/png" }]
+        // PWA Manifest 生成
+        const manifest = { 
+            "name": "蘑菇大師 Pro", 
+            "short_name": "蘑菇大師", 
+            "start_url": ".", 
+            "display": "standalone", 
+            "background_color": "#f8fafc", 
+            "theme_color": "#10b981", 
+            "icons": [{ "src": "https://www.pikminbloom.com/favicon.ico", "sizes": "192x192", "type": "image/png" }] 
         };
         document.getElementById('pwa-manifest').setAttribute('href', 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest)));
 
-        // 滑動輪初始化
-        function initWheels() {
-            createWheel('wheel-h', 24, 'h');
-            createWheel('wheel-m', 60, 'm');
-            createWheel('wheel-s', 60, 's');
-        }
-
+        // 滾輪初始化與事件
+        function initWheels() { createWheel('wheel-h', 24, 'h'); createWheel('wheel-m', 60, 'm'); createWheel('wheel-s', 60, 's'); }
         function createWheel(id, count, type) {
             const el = document.getElementById(id);
             let html = '';
             for(let i=0; i<count; i++) html += `<div class="picker-item" data-val="${i}">${String(i).padStart(2, '0')}</div>`;
             el.innerHTML = html;
-
             el.addEventListener('scroll', () => {
                 const index = Math.round(el.scrollTop / 50);
                 if (selectedTime[type] !== index && index < count) {
                     selectedTime[type] = index;
-                    el.querySelectorAll('.picker-item').forEach((item, i) => {
-                        item.classList.toggle('active', i === index);
-                    });
-                    // 滑動時微震動回饋
+                    el.querySelectorAll('.picker-item').forEach((item, i) => item.classList.toggle('active', i === index));
                     if (navigator.vibrate) navigator.vibrate(5);
                 }
             }, { passive: true });
-
-            // 防止滾動冒泡到背景，並阻止水平位移的可能性
-            el.addEventListener('touchmove', (e) => {
-                e.stopPropagation();
-            }, { passive: true });
-
-            setTimeout(() => { el.querySelectorAll('.picker-item')[0].classList.add('active'); }, 100);
         }
-
         function adjustWheel(type, amount) {
             const el = document.getElementById(`wheel-${type}`);
-            const current = selectedTime[type];
-            const max = type === 'h' ? 24 : 60;
-            const target = (current + amount) % max;
+            const target = (selectedTime[type] + amount) % (type === 'h' ? 24 : 60);
             el.scrollTo({ top: target * 50, behavior: 'smooth' });
+        }
+        function setPreset(h, m, s) {
+            document.getElementById('wheel-h').scrollTo({ top: h * 50, behavior: 'smooth' });
+            document.getElementById('wheel-m').scrollTo({ top: m * 50, behavior: 'smooth' });
+            document.getElementById('wheel-s').scrollTo({ top: s * 50, behavior: 'smooth' });
+            if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
         }
 
         function selectColor(id, emoji) {
             currentMushroomColor = { id, emoji };
-            document.querySelectorAll('.mush-icon-btn').forEach(btn => {
-                btn.classList.toggle('selected', btn.dataset.color === id);
-            });
+            document.querySelectorAll('.mush-icon-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.color === id));
             if (navigator.vibrate) navigator.vibrate(10);
         }
 
+        // Service Worker 註冊
         async function initSW() {
             if ('serviceWorker' in navigator) {
-                try {
-                    const swCode = `
-                        self.addEventListener('install', e => self.skipWaiting());
-                        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-                        self.addEventListener('notificationclick', e => {
-                            e.notification.close();
-                            e.waitUntil(clients.matchAll({type: 'window'}).then(c => c.length > 0 ? c[0].focus() : clients.openWindow('/')));
-                        });
-                    `;
-                    const blob = new Blob([swCode], { type: 'text/javascript' });
-                    swRegistration = await navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => {
-                        return null;
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                    self.addEventListener('notificationclick', e => {
+                        e.notification.close();
+                        e.waitUntil(clients.matchAll({type: 'window'}).then(c => c.length > 0 ? c[0].focus() : clients.openWindow('/')));
                     });
-                } catch (e) {}
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                swRegistration = await navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => null);
             }
             updateUIStatus();
         }
 
         function updateUIStatus() {
-            const statusDot = document.getElementById('pwa-status');
-            const statusText = document.getElementById('status-text');
-            const permLabel = document.getElementById('perm-label');
-            const permBtn = document.getElementById('perm-btn');
-
+            const dot = document.getElementById('pwa-status-dot');
+            const txt = document.getElementById('status-text');
+            const diag = document.getElementById('diag-card');
+            const info = document.getElementById('diag-info');
             if (Notification.permission === "granted") {
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.6)]";
-                statusText.innerText = swRegistration ? "背景監控運作中" : "前台監控運作中";
-                permLabel.innerText = "已授權通知";
-                permLabel.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300";
-                permBtn.classList.add('hidden');
+                dot.className = "w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_#4ade80]";
+                txt.innerText = swRegistration ? "背景監控運作中" : "前台監控中";
+                diag.classList.add('hidden');
             } else {
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse";
-                statusText.innerText = "需開啟通知權限";
-                permLabel.innerText = "權限受限";
-                permLabel.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300";
-                permBtn.classList.remove('hidden');
+                dot.className = "w-2 h-2 rounded-full bg-red-400 animate-pulse";
+                txt.innerText = "通知未啟動";
+                diag.classList.remove('hidden');
+                info.innerText = "ℹ️ 請點擊按鈕授權通知，系統將在重生前 20 秒提醒。";
             }
         }
+
+        function toggleDiag() { document.getElementById('diag-card').classList.toggle('hidden'); }
 
         async function requestNotificationPermission() {
             const p = await Notification.requestPermission();
             updateUIStatus();
-            if (p === "granted") {
-                showToast("通知權限已開啟");
-                testNotification(); 
-            }
+            if (p === "granted") showToast("✅ 通知功能已啟用");
         }
 
-        function testNotification() {
-            triggerNotification({ label: "測試提醒", iconEmoji: "🍄", id: "test" }, true);
-        }
-
+        // 資料處理核心
         function addMushroom() {
-            const labelText = document.getElementById('input-label').value.trim();
-            const label = labelText || `${currentMushroomColor.id}蘑菇`;
+            const labelInput = document.getElementById('input-label').value.trim();
+            const label = labelInput || `${currentMushroomColor.id}蘑菇`;
             const { h, m, s } = selectedTime;
-            
-            // 重生計算：戰鬥時間 + 300 秒 (5 分鐘)
+            // 計算：輸入時間 + 300 秒 (5 分鐘)
             const waitSec = (h * 3600) + (m * 60) + s + 300;
             const spawnAt = Date.now() + (waitSec * 1000);
 
             mushrooms.push({ 
                 id: Date.now(), 
                 label, 
-                iconEmoji: currentMushroomColor.emoji,
+                iconEmoji: currentMushroomColor.emoji, 
                 spawnAt, 
+                createdAt: Date.now(), 
                 notified: false 
             });
-            saveData();
-            renderList();
-            toggleAddModal();
-            showToast(`已鎖定：${currentMushroomColor.emoji} ${label} (5分重生)`);
+            saveData(); renderList(); toggleAddModal();
+            showToast(`🚀 已啟動：${currentMushroomColor.emoji} ${label}`);
             requestWakeLock();
-        }
-
-        function triggerNotification(m, isTest = false) {
-            const title = isTest ? "🍄 通知功能正常" : `${m.iconEmoji} 蘑菇即將重生！`;
-            const body = isTest ? "現在您可以放心去忙別的事了。" : `地點：${m.label}\n倒數 20 秒出現，快去佔位！`;
-            
-            const sound = document.getElementById('notif-sound');
-            if (sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
-
-            if (Notification.permission === "granted") {
-                if (swRegistration && swRegistration.showNotification) {
-                    swRegistration.showNotification(title, { body, icon: "https://www.pikminbloom.com/favicon.ico", badge: "https://www.pikminbloom.com/favicon.ico", vibrate: [200, 100, 200] });
-                } else {
-                    try { new Notification(title, { body }); } catch (e) {}
-                }
-            }
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
         }
 
         function renderList() {
@@ -449,92 +426,129 @@
             const empty = document.getElementById('empty-state');
             if (mushrooms.length === 0) { empty.classList.remove('hidden'); container.innerHTML = ""; return; }
             empty.classList.add('hidden');
-
+            
             mushrooms.sort((a,b) => a.spawnAt - b.spawnAt);
             container.innerHTML = mushrooms.map(m => {
-                const isOver = Date.now() > m.spawnAt;
+                const now = Date.now();
+                const isOver = now > m.spawnAt;
+                const total = m.spawnAt - m.createdAt;
+                const elapsed = now - m.createdAt;
+                const progress = isOver ? 100 : Math.min(100, Math.max(0, (elapsed / total) * 100));
+                
                 return `
-                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm relative overflow-hidden card-enter border-l-4" style="border-left-color: ${getHex(m.iconEmoji)}">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] px-3 py-1 rounded-full font-black ${isOver ? 'bg-slate-200 dark:bg-slate-800 text-slate-400' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'}">
-                                ${isOver ? '重生完成' : '監控中'}
-                            </span>
-                            <button onclick="deleteMushroom(${m.id})" class="text-slate-300 p-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-4xl premium-shadow relative overflow-hidden card-enter border border-slate-100 dark:border-slate-800">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5" style="background: ${getHex(m.iconEmoji)}"></div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">${m.iconEmoji}</span>
+                                <div>
+                                    <h3 class="font-black text-slate-800 dark:text-white text-lg leading-tight truncate max-w-[150px]">${m.label}</h3>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">重生時刻 ${new Date(m.spawnAt).toLocaleTimeString('zh-TW', {hour12:false})}</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteMushroom(${m.id})" class="w-10 h-10 bg-slate-50 dark:bg-slate-800 text-slate-300 rounded-2xl flex items-center justify-center active:scale-90 font-bold">✕</button>
                         </div>
-                        <h3 class="font-black text-slate-800 dark:text-slate-100 text-xl truncate pr-10">
-                            <span class="mr-2">${m.iconEmoji}</span>${m.label}
-                        </h3>
-                        <p class="text-xs font-bold text-slate-400 mt-1">預計重生：${new Date(m.spawnAt).toLocaleTimeString('zh-TW', {hour12:false})}</p>
-                        <div class="mt-4">
-                            <span id="t-${m.id}" class="font-mono text-4xl font-black ${isOver ? 'text-slate-200 dark:text-slate-800' : 'text-red-500'} tracking-tighter">
+                        
+                        <!-- 進度條 -->
+                        <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-4 relative">
+                            <div id="pb-${m.id}" class="h-full transition-all duration-1000 ease-linear relative ${isOver ? 'bg-slate-300' : ''}" 
+                                 style="width: ${progress}%; background-color: ${isOver ? '' : getHex(m.iconEmoji)}">
+                                 <div class="absolute inset-0 progress-shimmer opacity-30"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-end justify-between">
+                            <span id="t-${m.id}" class="font-mono text-4xl font-black ${isOver ? 'text-slate-200 dark:text-slate-800' : 'text-brand-500'} tracking-tighter">
                                 ${getRemaining(m.spawnAt)}
                             </span>
+                            <span class="text-[10px] font-black ${isOver ? 'text-slate-300' : 'text-slate-400'} uppercase pb-1 tracking-widest">${isOver ? 'FINISHED' : 'COUNTDOWN'}</span>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function getHex(emoji) {
-            const colors = { '🔴':'#ef4444', '🟡':'#eab308', '🔵':'#3b82f6', '🟣':'#a855f7', '⚪':'#cbd5e1', '🔘':'#64748b' };
-            return colors[emoji] || '#16a34a';
-        }
-
+        function getHex(emoji) { const colors = { '🔴':'#ef4444', '🟡':'#fbbf24', '🔵':'#3b82f6', '🟣':'#a855f7', '⚪':'#cbd5e1', '🔘':'#64748b' }; return colors[emoji] || '#10b981'; }
+        
         function getRemaining(target) {
             const diff = target - Date.now();
-            if (diff <= 0) return "REBORN";
+            if (diff <= 0) return "00:00:00";
             const s = Math.floor(diff / 1000);
             return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
         }
 
+        // 定時器邏輯
         function startTicker() {
             setInterval(() => {
                 const now = Date.now();
                 mushrooms.forEach(m => {
-                    const el = document.getElementById(`t-${m.id}`);
-                    if (el) el.innerText = getRemaining(m.spawnAt);
+                    const tEl = document.getElementById(`t-${m.id}`);
+                    const pEl = document.getElementById(`pb-${m.id}`);
+                    if (tEl) tEl.innerText = getRemaining(m.spawnAt);
+                    
+                    // 修正 Bug: 確保現在時間小於重生時間才更新進度條
+                    if (pEl && now < m.spawnAt) {
+                        const total = m.spawnAt - m.createdAt;
+                        const elapsed = now - m.createdAt;
+                        pEl.style.width = Math.min(100, Math.max(0, (elapsed / total) * 100)) + '%';
+                    } else if (pEl) {
+                        pEl.style.width = '100%';
+                    }
+
+                    // 20 秒提前通知邏輯
                     if (!m.notified && (m.spawnAt - now) <= 20000 && (m.spawnAt - now) > 0) {
-                        m.notified = true;
-                        triggerNotification(m);
-                        saveData();
+                        m.notified = true; triggerNotification(m); saveData();
                     }
                 });
             }, 1000);
         }
 
-        async function requestWakeLock() {
-            if ('wakeLock' in navigator && mushrooms.some(m => m.spawnAt > Date.now())) {
-                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+        function triggerNotification(m, isTest = false) {
+            const title = isTest ? "🍄 通知測試成功" : `${m.iconEmoji} 蘑菇即將重生！`;
+            const body = isTest ? "通知功能正常運作中。" : `${m.label} 重生倒數 20 秒，請開啟遊戲準備。`;
+            const sound = document.getElementById('notif-sound');
+            if (sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
+            if (Notification.permission === "granted") {
+                if (swRegistration && swRegistration.showNotification) swRegistration.showNotification(title, { body, icon: "https://www.pikminbloom.com/favicon.ico", vibrate: [200, 100, 200] });
+                else try { new Notification(title, { body }); } catch (e) {}
             }
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
         }
 
+        // PWA 與系統功能
+        async function requestWakeLock() { if ('wakeLock' in navigator && mushrooms.some(m => m.spawnAt > Date.now())) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} } }
+        
         function toggleAddModal() {
             const modal = document.getElementById('add-modal');
-            const isOpen = modal.classList.toggle('hidden');
-            if (!isOpen) {
+            const isClosing = !modal.classList.contains('hidden');
+            
+            if (!isClosing) {
+                scrollYBeforeModal = window.scrollY;
+                modal.classList.remove('hidden');
+                setTimeout(() => document.body.classList.add('modal-active'), 10);
                 document.body.classList.add('modal-open');
-                // 修正 iOS 下鎖定背景後可能發生的位置偏移問題
-                document.body.style.top = `-${window.scrollY}px`;
+                document.body.style.top = `-${scrollYBeforeModal}px`;
             } else {
-                const scrollY = document.body.style.top;
-                document.body.classList.remove('modal-open');
-                document.body.style.top = '';
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+                document.body.classList.remove('modal-active');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('modal-open');
+                    document.body.style.top = '';
+                    window.scrollTo(0, scrollYBeforeModal);
+                }, 400);
             }
         }
 
         function deleteMushroom(id) { mushrooms = mushrooms.filter(m => m.id !== id); saveData(); renderList(); }
-        function saveData() { localStorage.setItem('pm_pro_data', JSON.stringify(mushrooms)); }
-        function loadData() {
-            const d = localStorage.getItem('pm_pro_data');
-            if (d) {
-                try { mushrooms = JSON.parse(d).filter(m => m.spawnAt > (Date.now() - 86400000)); } catch(e) { mushrooms = []; }
-            }
+        function saveData() { localStorage.setItem('pm_ultra_v5', JSON.stringify(mushrooms)); }
+        function loadData() { 
+            const d = localStorage.getItem('pm_ultra_v5') || localStorage.getItem('pm_ultra_data') || localStorage.getItem('pm_v4_data'); 
+            if (d) { try { mushrooms = JSON.parse(d).filter(m => m.spawnAt > (Date.now() - 86400000)); } catch(e) { mushrooms = []; } } 
         }
-        function showToast(m) {
-            const t = document.getElementById('toast');
-            t.innerText = m; t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 3000);
+        function showToast(m) { 
+            const t = document.getElementById('toast'); t.innerText = m; 
+            t.style.opacity = '1'; t.style.transform = 'translate(-50%, 15px)'; 
+            setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translate(-50%, 0)'; }, 3000); 
         }
 
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') requestWakeLock(); });
