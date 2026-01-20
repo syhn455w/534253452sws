@@ -75,26 +75,27 @@
             border-radius: 1.5rem;
             mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
-            /* 關鍵：防止滑動力量傳遞到背景 */
             overscroll-behavior: contain;
         }
         .dark .picker-container { background: rgba(255,255,255,0.05); }
 
         .picker-column {
-            flex: 1;
+            flex: 1 0 33.33%; /* 強制固定寬度，防止左右位移 */
             overflow-y: scroll;
+            overflow-x: hidden; /* 徹底禁止水平滾動，解決 iPhone 左右飄的問題 */
             scroll-snap-type: y mandatory;
             scrollbar-width: none;
-            padding: 55px 0;
-            /* 優化移動端滑動感 */
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
-            touch-action: pan-y;
+            touch-action: pan-y; /* 鎖定只許垂直滑動 */
+            padding: 55px 0;
+            position: relative;
         }
         .picker-column::-webkit-scrollbar { display: none; }
 
         .picker-item {
             height: 50px;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -103,6 +104,7 @@
             font-weight: 900;
             color: #94a3b8;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
         }
         .picker-item.active { color: #16a34a; transform: scale(1.15); }
         .dark .picker-item.active { color: #4ade80; }
@@ -222,8 +224,9 @@
                     <div class="flex justify-between items-center px-1">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">剩餘戰鬥時間</label>
                         <div class="flex gap-2">
-                            <button onclick="adjustWheel('h', 1)" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md font-bold">+1時</button>
-                            <button onclick="adjustWheel('m', 10)" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md font-bold">+10分</button>
+                            <button onclick="adjustWheel('h', 1)" class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl font-bold active:bg-green-100 transition-colors">+1時</button>
+                            <button onclick="adjustWheel('m', 10)" class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl font-bold active:bg-green-100 transition-colors">+10分</button>
+                            <button onclick="adjustWheel('s', 10)" class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl font-bold active:bg-green-100 transition-colors">+10秒</button>
                         </div>
                     </div>
                     <div class="picker-container">
@@ -323,7 +326,7 @@
                 }
             }, { passive: true });
 
-            // 防止滾動冒泡到背景
+            // 防止滾動冒泡到背景，並阻止水平位移的可能性
             el.addEventListener('touchmove', (e) => {
                 e.stopPropagation();
             }, { passive: true });
