@@ -423,16 +423,35 @@
             }
         }
 
-        // 行事曆匯出
+        // 行事曆匯出 - 修正 PWA 白屏問題
         function addToCalendar(m) {
             const startTime = new Date(m.spawnAt).toISOString().replace(/-|:|\.\d\d\d/g, "");
-            const endTime = new Date(m.spawnAt + 600000).toISOString().replace(/-|:|\.\d\d\d/g, ""); // 10 mins
-            const title = encodeURIComponent(`🍄 ${m.label} 重生`);
-            const details = encodeURIComponent("皮克敏蘑菇計時器提醒");
-            const icsContent = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ADTSTART:${startTime}%0ADTEND:${endTime}%0ASUMMARY:${title}%0ADESCRIPTION:${details}%0AEND:VEVENT%0AEND:VCALENDAR`;
+            const endTime = new Date(m.spawnAt + 600000).toISOString().replace(/-|:|\.\d\d\d/g, ""); 
+            const title = `🍄 ${m.label} 重生`;
+            const details = "皮克敏蘑菇計時器提醒";
             
-            // iOS Safari 需要 window.open
-            window.open(icsContent);
+            // 使用標準 Blob 下載方式，避免 data: URI 導航導致白屏
+            const icsContent = [
+                "BEGIN:VCALENDAR",
+                "VERSION:2.0",
+                "BEGIN:VEVENT",
+                `DTSTART:${startTime}`,
+                `DTEND:${endTime}`,
+                `SUMMARY:${title}`,
+                `DESCRIPTION:${details}`,
+                "END:VEVENT",
+                "END:VCALENDAR"
+            ].join("\n");
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'mushroom.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
         function addMushroom() {
@@ -485,7 +504,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="addToCalendar({spawnAt: ${m.spawnAt}, label: '${m.label}'})" class="w-10 h-10 bg-brand-50 dark:bg-brand-900/30 text-brand-600 rounded-2xl flex items-center justify-center active:scale-90 font-bold" title="加入行事曆">📅</button>
+                                <button onclick='addToCalendar(${JSON.stringify({spawnAt: m.spawnAt, label: m.label})})' class="w-10 h-10 bg-brand-50 dark:bg-brand-900/30 text-brand-600 rounded-2xl flex items-center justify-center active:scale-90 font-bold" title="加入行事曆">📅</button>
                                 <button onclick="deleteMushroom(${m.id})" class="w-10 h-10 bg-slate-50 dark:bg-slate-800 text-slate-300 rounded-2xl flex items-center justify-center active:scale-90 font-bold">✕</button>
                             </div>
                         </div>
