@@ -41,6 +41,15 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.3s;
+            /* 防止整體頁面過度拉伸 */
+            overscroll-behavior-y: none;
+        }
+
+        /* 鎖定背景捲動的樣式 */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
         }
         
         .app-gradient { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
@@ -56,7 +65,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* 滾輪選擇器樣式 */
+        /* 滾輪選擇器優化：防止抖動與隔離捲動 */
         .picker-container {
             position: relative;
             height: 160px;
@@ -66,6 +75,8 @@
             border-radius: 1.5rem;
             mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
+            /* 關鍵：防止滑動力量傳遞到背景 */
+            overscroll-behavior: contain;
         }
         .dark .picker-container { background: rgba(255,255,255,0.05); }
 
@@ -75,6 +86,10 @@
             scroll-snap-type: y mandatory;
             scrollbar-width: none;
             padding: 55px 0;
+            /* 優化移動端滑動感 */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
         }
         .picker-column::-webkit-scrollbar { display: none; }
 
@@ -87,9 +102,9 @@
             font-size: 1.25rem;
             font-weight: 900;
             color: #94a3b8;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .picker-item.active { color: #16a34a; transform: scale(1.2); }
+        .picker-item.active { color: #16a34a; transform: scale(1.15); }
         .dark .picker-item.active { color: #4ade80; }
 
         .picker-center-bar {
@@ -116,6 +131,7 @@
             background: white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        .dark .mush-icon-btn.selected { background: #1e293b; border-color: #4ade80; }
     </style>
 </head>
 <body class="min-h-screen pb-20 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -302,9 +318,16 @@
                     el.querySelectorAll('.picker-item').forEach((item, i) => {
                         item.classList.toggle('active', i === index);
                     });
+                    // 滑動時微震動回饋
                     if (navigator.vibrate) navigator.vibrate(5);
                 }
-            });
+            }, { passive: true });
+
+            // 防止滾動冒泡到背景
+            el.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+
             setTimeout(() => { el.querySelectorAll('.picker-item')[0].classList.add('active'); }, 100);
         }
 
@@ -337,7 +360,6 @@
                     `;
                     const blob = new Blob([swCode], { type: 'text/javascript' });
                     swRegistration = await navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => {
-                        console.warn("SW Restricted");
                         return null;
                     });
                 } catch (e) {}
@@ -380,8 +402,10 @@
         }
 
         function addMushroom() {
-            const label = document.getElementById('input-label').value || `${currentMushroomColor.id}蘑菇`;
+            const labelText = document.getElementById('input-label').value.trim();
+            const label = labelText || `${currentMushroomColor.id}蘑菇`;
             const { h, m, s } = selectedTime;
+            
             // 重生計算：戰鬥時間 + 300 秒 (5 分鐘)
             const waitSec = (h * 3600) + (m * 60) + s + 300;
             const spawnAt = Date.now() + (waitSec * 1000);
@@ -402,7 +426,6 @@
 
         function triggerNotification(m, isTest = false) {
             const title = isTest ? "🍄 通知功能正常" : `${m.iconEmoji} 蘑菇即將重生！`;
-            // 通知內容修改為 20 秒
             const body = isTest ? "現在您可以放心去忙別的事了。" : `地點：${m.label}\n倒數 20 秒出現，快去佔位！`;
             
             const sound = document.getElementById('notif-sound');
@@ -467,7 +490,6 @@
                 mushrooms.forEach(m => {
                     const el = document.getElementById(`t-${m.id}`);
                     if (el) el.innerText = getRemaining(m.spawnAt);
-                    // 觸發閾值從 15000ms 調整為 20000ms (重生前 20 秒通知)
                     if (!m.notified && (m.spawnAt - now) <= 20000 && (m.spawnAt - now) > 0) {
                         m.notified = true;
                         triggerNotification(m);
@@ -483,7 +505,21 @@
             }
         }
 
-        function toggleAddModal() { document.getElementById('add-modal').classList.toggle('hidden'); }
+        function toggleAddModal() {
+            const modal = document.getElementById('add-modal');
+            const isOpen = modal.classList.toggle('hidden');
+            if (!isOpen) {
+                document.body.classList.add('modal-open');
+                // 修正 iOS 下鎖定背景後可能發生的位置偏移問題
+                document.body.style.top = `-${window.scrollY}px`;
+            } else {
+                const scrollY = document.body.style.top;
+                document.body.classList.remove('modal-open');
+                document.body.style.top = '';
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
+        }
+
         function deleteMushroom(id) { mushrooms = mushrooms.filter(m => m.id !== id); saveData(); renderList(); }
         function saveData() { localStorage.setItem('pm_pro_data', JSON.stringify(mushrooms)); }
         function loadData() {
