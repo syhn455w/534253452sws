@@ -49,7 +49,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 修正 iOS 背景鎖定偏移的關鍵 CSS */
         body.modal-open { 
             overflow: hidden; 
             position: fixed; 
@@ -61,7 +60,6 @@
         .dark .premium-bg { background: linear-gradient(165deg, #064e3b 0%, #022c22 100%); }
         .premium-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
 
-        /* 滾輪選擇器組件 */
         .picker-container {
             position: relative;
             height: 180px;
@@ -113,7 +111,6 @@
             pointer-events: none; 
         }
 
-        /* 底部抽屜動畫邏輯 */
         .drawer-content { 
             transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); 
             transform: translateY(100%); 
@@ -126,7 +123,6 @@
             animation: shimmer 2s infinite;
         }
 
-        /* 蘑菇圖示選擇按鈕 */
         .mush-icon-btn {
             width: 46px; height: 46px;
             border-radius: 14px;
@@ -147,7 +143,6 @@
 <body class="dark:bg-slate-950 text-slate-900 dark:text-slate-100">
 
     <div class="app-shell flex flex-col min-h-screen">
-        <!-- 頂部 Header：支援動態島 -->
         <header class="premium-bg text-white px-6 pb-14 rounded-b-[4rem] shadow-2xl sticky top-0 z-30 transition-all overflow-hidden">
             <div class="max-w-md mx-auto" style="padding-top: calc(var(--safe-area-inset-top) + 1rem);">
                 <div class="flex justify-between items-center">
@@ -157,11 +152,14 @@
                         </h1>
                         <div id="status-badge" class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full mt-2 transition-all cursor-pointer" onclick="toggleDiag()">
                             <span id="pwa-status-dot" class="w-2 h-2 rounded-full bg-red-400 shadow-sm"></span>
-                            <span id="status-text" class="text-[10px] font-bold uppercase tracking-widest">系統檢查中</span>
+                            <span id="status-text" class="text-[10px] font-bold uppercase tracking-widest text-white">檢查權限</span>
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="toggleDarkMode()" class="p-4 bg-white/10 hover:bg-white/20 rounded-3xl backdrop-blur-lg border border-white/10 active:scale-90 transition-all">
+                        <button onclick="testNotification()" class="p-4 bg-white/10 rounded-3xl backdrop-blur-lg border border-white/10 active:scale-90 transition-all" title="強制測試通知">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        </button>
+                        <button onclick="toggleDarkMode()" class="p-4 bg-white/10 rounded-3xl backdrop-blur-lg border border-white/10 active:scale-90 transition-all">
                             <svg id="dark-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                         </button>
                     </div>
@@ -169,34 +167,39 @@
             </div>
         </header>
 
-        <!-- 主內容清單 -->
         <main class="max-w-md mx-auto w-full px-5 -mt-8 space-y-6 z-10 flex-grow pb-32">
-            <!-- 診斷卡片 -->
             <div id="diag-card" class="hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-6 rounded-4xl border border-slate-200/50 dark:border-slate-800/50 premium-shadow animate-slide-up">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">授權診斷中心</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">通知修復與診斷</span>
                     <button onclick="toggleDiag()" class="text-slate-300 font-bold p-1">✕</button>
                 </div>
-                <p id="diag-info" class="text-xs font-medium text-slate-600 dark:text-slate-400 leading-relaxed"></p>
+                <div class="space-y-3">
+                    <p id="diag-info" class="text-xs font-medium text-slate-600 dark:text-slate-400 leading-relaxed"></p>
+                    <div id="ios-only-tip" class="hidden p-3 bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800 rounded-2xl">
+                        <p class="text-[10px] text-brand-600 dark:text-brand-300 font-bold leading-relaxed">
+                            💡 iOS 專屬修正：若在 Safari 開啟，請點擊「分享」並選擇「加入主畫面」。安裝後開啟 App，再次點擊此處授權即可生效。
+                        </p>
+                    </div>
+                </div>
                 <button onclick="requestNotificationPermission()" id="perm-btn" class="w-full mt-4 bg-brand-500 text-white py-4 rounded-2xl text-xs font-bold shadow-lg active:scale-95 transition-all">
-                    立即啟用完整通知權限
+                    1. 點此授權通知
+                </button>
+                <button onclick="testNotification()" class="w-full mt-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 py-3 rounded-2xl text-[10px] font-black active:scale-95 transition-all">
+                    2. 傳送測試通知
                 </button>
             </div>
 
-            <!-- 動態生成的列表 -->
             <div id="mushroom-list" class="grid gap-5"></div>
 
-            <!-- 空狀態提示 -->
             <div id="empty-state" class="hidden py-32 text-center space-y-4">
                 <div class="relative inline-block">
                     <div class="absolute inset-0 bg-brand-500/20 blur-3xl rounded-full"></div>
                     <span class="relative text-7xl">🍃</span>
                 </div>
-                <p class="text-slate-400 font-bold tracking-tight">目前沒有監控中的蘑菇<br><span class="text-[10px] font-medium opacity-60 uppercase tracking-widest mt-1 inline-block">Tap + to add new tracker</span></p>
+                <p class="text-slate-400 font-bold tracking-tight">目前沒有監控中的蘑菇<br><span class="text-[10px] font-medium opacity-60 uppercase tracking-widest mt-1 inline-block">點擊下方按鈕開始</span></p>
             </div>
         </main>
 
-        <!-- 底部 FAB -->
         <div class="fixed bottom-8 right-6 z-40">
             <button onclick="toggleAddModal()" class="w-20 h-20 bg-brand-500 text-white rounded-[2.2rem] flex items-center justify-center active:scale-90 transition-all shadow-2xl border-4 border-white dark:border-slate-900">
                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
@@ -204,7 +207,7 @@
         </div>
     </div>
 
-    <!-- 新增蘑菇抽屜 (Master Pro 精修版) -->
+    <!-- 新增蘑菇抽屜 -->
     <div id="add-modal" class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 backdrop-blur-sm hidden transition-opacity">
         <div class="drawer-content bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-[3.5rem] p-8 pb-14 shadow-2xl overflow-hidden relative">
             <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-8"></div>
@@ -215,21 +218,19 @@
             </div>
 
             <div class="space-y-6">
-                <!-- 智慧預設 -->
                 <div class="space-y-3">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">快速預設戰鬥時間</label>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">常用戰鬥時間</label>
                     <div class="grid grid-cols-4 gap-2">
-                        <button onclick="setPreset(3, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">3 時</button>
-                        <button onclick="setPreset(6, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">6 時</button>
-                        <button onclick="setPreset(12, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">12 時</button>
-                        <button onclick="setPreset(23, 59, 59)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black hover:bg-brand-500 hover:text-white transition-all active:scale-95">1 天</button>
+                        <button onclick="setPreset(3, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black active:scale-95">3 時</button>
+                        <button onclick="setPreset(6, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black active:scale-95">6 時</button>
+                        <button onclick="setPreset(12, 0, 0)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black active:scale-95">12 時</button>
+                        <button onclick="setPreset(23, 59, 59)" class="py-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-black active:scale-95">1 天</button>
                     </div>
                 </div>
 
-                <!-- 顏色與標籤 -->
                 <div class="space-y-3">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">標籤與蘑菇類型</label>
-                    <input type="text" id="input-label" placeholder="例如：巷口紅蘑菇" class="w-full p-5 bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent rounded-4xl focus:border-brand-500 focus:bg-white dark:focus:bg-slate-800 outline-none font-bold text-lg transition-all">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">標籤與類型</label>
+                    <input type="text" id="input-label" placeholder="例如：巷口紅蘑菇" class="w-full p-5 bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent rounded-4xl focus:border-brand-500 focus:bg-white outline-none font-bold text-lg transition-all">
                     <div class="flex justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-4xl border border-slate-100 dark:border-slate-800" id="color-picker">
                         <button onclick="selectColor('red', '🔴')" class="mush-icon-btn selected" data-color="red">🔴</button>
                         <button onclick="selectColor('yellow', '🟡')" class="mush-icon-btn" data-color="yellow">🟡</button>
@@ -240,13 +241,12 @@
                     </div>
                 </div>
 
-                <!-- 滾輪微調 -->
                 <div class="space-y-3">
                     <div class="flex justify-between items-center px-1">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">精確微調戰鬥剩餘時間</label>
                         <div class="flex gap-2">
-                            <button onclick="adjustWheel('m', 10)" class="text-[10px] bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300 px-3 py-1.5 rounded-xl font-black active:scale-95">+10分</button>
-                            <button onclick="adjustWheel('s', 10)" class="text-[10px] bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300 px-3 py-1.5 rounded-xl font-black active:scale-95">+10秒</button>
+                            <button onclick="adjustWheel('m', 10)" class="text-[10px] bg-brand-50 text-brand-600 dark:bg-brand-900/40 px-3 py-1.5 rounded-xl font-black active:scale-95">+10分</button>
+                            <button onclick="adjustWheel('s', 10)" class="text-[10px] bg-brand-50 text-brand-600 dark:bg-brand-900/40 px-3 py-1.5 rounded-xl font-black active:scale-95">+10秒</button>
                         </div>
                     </div>
                     <div class="picker-container">
@@ -257,15 +257,14 @@
                     </div>
                 </div>
 
-                <button onclick="addMushroom()" class="w-full bg-brand-500 text-white font-black py-6 rounded-4xl shadow-xl shadow-brand-500/20 active:scale-[0.98] transition-all text-xl mt-4">
+                <button onclick="addMushroom()" class="w-full bg-brand-500 text-white font-black py-6 rounded-4xl shadow-xl active:scale-[0.98] transition-all text-xl mt-4">
                     確認追蹤 (5分重生)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 全局快訊 -->
-    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-slate-900/95 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-full shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[60] text-sm font-black border border-white/10">已完成</div>
+    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-slate-900/95 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-full shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[60] text-sm font-black border border-white/10 text-center">已完成</div>
 
     <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
@@ -277,17 +276,19 @@
         let currentMushroomColor = { id: 'red', emoji: '🔴' };
         let scrollYBeforeModal = 0;
 
-        // 初始化
         window.onload = () => { 
             initDarkMode(); 
-            initSW(); 
             initWheels(); 
             loadData(); 
             renderList(); 
             startTicker(); 
+            // 延遲初始化 SW，確保資源加載完畢
+            setTimeout(initSW, 500); 
         };
 
-        // 深色模式邏輯
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
         function initDarkMode() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -311,7 +312,6 @@
             }
         }
 
-        // PWA Manifest 生成
         const manifest = { 
             "name": "蘑菇大師 Pro", 
             "short_name": "蘑菇大師", 
@@ -323,7 +323,6 @@
         };
         document.getElementById('pwa-manifest').setAttribute('href', 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest)));
 
-        // 滾輪初始化與事件
         function initWheels() { createWheel('wheel-h', 24, 'h'); createWheel('wheel-m', 60, 'm'); createWheel('wheel-s', 60, 's'); }
         function createWheel(id, count, type) {
             const el = document.getElementById(id);
@@ -350,14 +349,12 @@
             document.getElementById('wheel-s').scrollTo({ top: s * 50, behavior: 'smooth' });
             if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
         }
-
         function selectColor(id, emoji) {
             currentMushroomColor = { id, emoji };
             document.querySelectorAll('.mush-icon-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.color === id));
             if (navigator.vibrate) navigator.vibrate(10);
         }
 
-        // Service Worker 註冊
         async function initSW() {
             if ('serviceWorker' in navigator) {
                 const swCode = `
@@ -369,7 +366,10 @@
                     });
                 `;
                 const blob = new Blob([swCode], { type: 'text/javascript' });
-                swRegistration = await navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => null);
+                swRegistration = await navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(e => {
+                    console.log("SW Register Fail", e);
+                    return null;
+                });
             }
             updateUIStatus();
         }
@@ -377,34 +377,56 @@
         function updateUIStatus() {
             const dot = document.getElementById('pwa-status-dot');
             const txt = document.getElementById('status-text');
-            const diag = document.getElementById('diag-card');
             const info = document.getElementById('diag-info');
+            const iosTip = document.getElementById('ios-only-tip');
+
             if (Notification.permission === "granted") {
                 dot.className = "w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_#4ade80]";
-                txt.innerText = swRegistration ? "背景監控運作中" : "前台監控中";
-                diag.classList.add('hidden');
+                txt.innerText = swRegistration ? "背景已就緒" : "通知已就緒";
+                document.getElementById('diag-card').classList.add('hidden');
             } else {
                 dot.className = "w-2 h-2 rounded-full bg-red-400 animate-pulse";
-                txt.innerText = "通知未啟動";
-                diag.classList.remove('hidden');
-                info.innerText = "ℹ️ 請點擊按鈕授權通知，系統將在重生前 20 秒提醒。";
+                txt.innerText = "權限異常";
+                document.getElementById('diag-card').classList.remove('hidden');
+                
+                if (isIOS && !isStandalone) {
+                    iosTip.classList.remove('hidden');
+                    info.innerText = "⚠️ 偵測到 iOS Safari：瀏覽器限制網頁發送通知。";
+                } else {
+                    iosTip.classList.add('hidden');
+                    info.innerText = Notification.permission === "denied" 
+                        ? "⚠️ 權限遭拒：請點擊網址列旁的鎖頭或到設定手動開啟通知。" 
+                        : "ℹ️ 請授權通知權限，系統將在重生前 20 秒提醒。";
+                }
             }
         }
 
         function toggleDiag() { document.getElementById('diag-card').classList.toggle('hidden'); }
 
         async function requestNotificationPermission() {
+            if (isIOS && !isStandalone) {
+                showToast("❌ 請先「加入主畫面」後再執行此操作");
+                return;
+            }
             const p = await Notification.requestPermission();
             updateUIStatus();
             if (p === "granted") showToast("✅ 通知功能已啟用");
         }
 
-        // 資料處理核心
+        function testNotification() {
+            if (Notification.permission !== "granted") {
+                toggleDiag();
+                showToast("❌ 請先開啟權限");
+                return;
+            }
+            showToast("🔔 正在嘗試發送通知...");
+            triggerNotification({ label: "測試提醒", iconEmoji: "🍄", id: "test" }, true);
+        }
+
         function addMushroom() {
             const labelInput = document.getElementById('input-label').value.trim();
             const label = labelInput || `${currentMushroomColor.id}蘑菇`;
             const { h, m, s } = selectedTime;
-            // 計算：輸入時間 + 300 秒 (5 分鐘)
             const waitSec = (h * 3600) + (m * 60) + s + 300;
             const spawnAt = Date.now() + (waitSec * 1000);
 
@@ -419,6 +441,32 @@
             saveData(); renderList(); toggleAddModal();
             showToast(`🚀 已啟動：${currentMushroomColor.emoji} ${label}`);
             requestWakeLock();
+        }
+
+        function triggerNotification(m, isTest = false) {
+            const title = isTest ? "🍄 通知測試成功" : `${m.iconEmoji} 蘑菇即將重生！`;
+            const body = isTest ? "若看到此訊息，代表您能在重生時收到提醒。" : `${m.label} 重生倒數 20 秒，快開啟遊戲。`;
+            
+            // 聲音與震動先觸發
+            const sound = document.getElementById('notif-sound');
+            if (sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+            // 正式通知：務必使用 Service Worker 的 showNotification (背景通知關鍵)
+            if (Notification.permission === "granted") {
+                if (swRegistration && swRegistration.showNotification) {
+                    swRegistration.showNotification(title, { 
+                        body, 
+                        icon: "https://www.pikminbloom.com/favicon.ico",
+                        badge: "https://www.pikminbloom.com/favicon.ico",
+                        vibrate: [200, 100, 200],
+                        tag: m.id,
+                        renotify: true
+                    });
+                } else {
+                    new Notification(title, { body });
+                }
+            }
         }
 
         function renderList() {
@@ -449,7 +497,6 @@
                             <button onclick="deleteMushroom(${m.id})" class="w-10 h-10 bg-slate-50 dark:bg-slate-800 text-slate-300 rounded-2xl flex items-center justify-center active:scale-90 font-bold">✕</button>
                         </div>
                         
-                        <!-- 進度條 -->
                         <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-4 relative">
                             <div id="pb-${m.id}" class="h-full transition-all duration-1000 ease-linear relative ${isOver ? 'bg-slate-300' : ''}" 
                                  style="width: ${progress}%; background-color: ${isOver ? '' : getHex(m.iconEmoji)}">
@@ -469,7 +516,6 @@
         }
 
         function getHex(emoji) { const colors = { '🔴':'#ef4444', '🟡':'#fbbf24', '🔵':'#3b82f6', '🟣':'#a855f7', '⚪':'#cbd5e1', '🔘':'#64748b' }; return colors[emoji] || '#10b981'; }
-        
         function getRemaining(target) {
             const diff = target - Date.now();
             if (diff <= 0) return "00:00:00";
@@ -477,7 +523,6 @@
             return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
         }
 
-        // 定時器邏輯
         function startTicker() {
             setInterval(() => {
                 const now = Date.now();
@@ -485,8 +530,6 @@
                     const tEl = document.getElementById(`t-${m.id}`);
                     const pEl = document.getElementById(`pb-${m.id}`);
                     if (tEl) tEl.innerText = getRemaining(m.spawnAt);
-                    
-                    // 修正 Bug: 確保現在時間小於重生時間才更新進度條
                     if (pEl && now < m.spawnAt) {
                         const total = m.spawnAt - m.createdAt;
                         const elapsed = now - m.createdAt;
@@ -495,7 +538,6 @@
                         pEl.style.width = '100%';
                     }
 
-                    // 20 秒提前通知邏輯
                     if (!m.notified && (m.spawnAt - now) <= 20000 && (m.spawnAt - now) > 0) {
                         m.notified = true; triggerNotification(m); saveData();
                     }
@@ -503,25 +545,11 @@
             }, 1000);
         }
 
-        function triggerNotification(m, isTest = false) {
-            const title = isTest ? "🍄 通知測試成功" : `${m.iconEmoji} 蘑菇即將重生！`;
-            const body = isTest ? "通知功能正常運作中。" : `${m.label} 重生倒數 20 秒，請開啟遊戲準備。`;
-            const sound = document.getElementById('notif-sound');
-            if (sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
-            if (Notification.permission === "granted") {
-                if (swRegistration && swRegistration.showNotification) swRegistration.showNotification(title, { body, icon: "https://www.pikminbloom.com/favicon.ico", vibrate: [200, 100, 200] });
-                else try { new Notification(title, { body }); } catch (e) {}
-            }
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        }
-
-        // PWA 與系統功能
         async function requestWakeLock() { if ('wakeLock' in navigator && mushrooms.some(m => m.spawnAt > Date.now())) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} } }
         
         function toggleAddModal() {
             const modal = document.getElementById('add-modal');
             const isClosing = !modal.classList.contains('hidden');
-            
             if (!isClosing) {
                 scrollYBeforeModal = window.scrollY;
                 modal.classList.remove('hidden');
@@ -540,9 +568,9 @@
         }
 
         function deleteMushroom(id) { mushrooms = mushrooms.filter(m => m.id !== id); saveData(); renderList(); }
-        function saveData() { localStorage.setItem('pm_ultra_v5', JSON.stringify(mushrooms)); }
+        function saveData() { localStorage.setItem('pm_ultra_v6', JSON.stringify(mushrooms)); }
         function loadData() { 
-            const d = localStorage.getItem('pm_ultra_v5') || localStorage.getItem('pm_ultra_data') || localStorage.getItem('pm_v4_data'); 
+            const d = localStorage.getItem('pm_ultra_v6') || localStorage.getItem('pm_ultra_v5') || localStorage.getItem('pm_pro_data'); 
             if (d) { try { mushrooms = JSON.parse(d).filter(m => m.spawnAt > (Date.now() - 86400000)); } catch(e) { mushrooms = []; } } 
         }
         function showToast(m) { 
@@ -555,3 +583,4 @@
     </script>
 </body>
 </html>
+
